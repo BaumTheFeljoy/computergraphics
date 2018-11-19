@@ -26,10 +26,16 @@ public class Mat4 {
 
     public Mat4(float near, float far) {
         // TODO erzeugt Projektionsmatrix mit Abstand zur nahen Ebene "near" und Abstand zur fernen Ebene "far", ggf. weitere Parameter hinzufügen
+        m = new float[] {
+                near, 0, 0, 0,
+                0, near, 0, 0,
+                0, 0, (-far - near) / (far - near), -1,
+                0, 0, (-2 * near * far) / (far - near), 0
+        };
     }
 
     public Mat4 multiply(Mat4 other) {
-        // TODO hier Matrizenmultiplikation "this = other * this" einfügen
+        //hier Matrizenmultiplikation "this = other * this" einfügen
         float[] o = other.getValuesAsArray();
         float[] r = new float[16];
 
@@ -58,7 +64,7 @@ public class Mat4 {
     }
 
     public Mat4 translate(float x, float y, float z) {
-        // TODO Verschiebung um x,y,z zu this hinzufügen
+        //Verschiebung um x,y,z zu this hinzufügen
         multiply(new Mat4(new float[]{
                 1,0,0,0,
                 0,1,0,0,
@@ -83,7 +89,7 @@ public class Mat4 {
     }
 
     public Mat4 rotateX(float angle) {
-        // TODO Rotation um X-Achse zu this hinzufügen
+        //Rotation um X-Achse zu this hinzufügen
         float cos = (float)Math.cos(angle);
         float sin = (float)Math.sin(angle);
         multiply(new Mat4(new float[]{
@@ -95,7 +101,7 @@ public class Mat4 {
     }
 
     public Mat4 rotateY(float angle) {
-        // TODO Rotation um Y-Achse zu this hinzufügen
+        //Rotation um Y-Achse zu this hinzufügen
         float cos = (float)Math.cos(angle);
         float sin = (float)Math.sin(angle);
         multiply(new Mat4(new float[]{
@@ -107,7 +113,7 @@ public class Mat4 {
     }
 
     public Mat4 rotateZ(float angle) {
-        // TODO Rotation um Z-Achse zu this hinzufügen
+        //Rotation um Z-Achse zu this hinzufügen
         float cos = (float)Math.cos(angle);
         float sin = (float)Math.sin(angle);
         multiply(new Mat4(new float[]{
@@ -119,7 +125,7 @@ public class Mat4 {
     }
 
     public float[] getValuesAsArray() {
-        // TODO hier Werte in einem Float-Array mit 16 Elementen (spaltenweise gefällt) herausgeben
+        //hier Werte in einem Float-Array mit 16 Elementen (spaltenweise gefällt) herausgeben
         return m;
     }
 }
