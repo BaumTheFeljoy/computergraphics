@@ -1,12 +1,15 @@
 #version 330
 #define M_PI 3.1415926535897932384626433832795
 layout(location=0) in vec3 vertex;
+layout(location=1) in vec3 normalen;
 /*
 layout(location=1) in vec3 farbenAusJava;
 */
 
 //int gradzahl = 90;
 out vec3 farbe;
+out vec3 pixelCoordimRaum;
+out vec3 normalenAdjusted;
 
 uniform mat4 matrix;
 uniform mat4 projectionMatrix;
@@ -19,7 +22,6 @@ gl_Position = eckenRotiert;
 //warum nicht als out wie im F.Shader?!
 }*/
 void main() {
-/*
     //black
     if (vertex.x == -0.5 && vertex.y == -0.5 && vertex.z == -0.5) {
         farbe = vec3(0.0, 0.0, 0.0);
@@ -47,8 +49,7 @@ void main() {
     } else {
         farbe = vec3(0.5, 0.5, 0.5);
     }
-*/
- if (gl_VertexID < 6) {
+/* if (gl_VertexID < 6) {
         farbe = vec3(1.0, 0.0, 0.0);
     } else if (gl_VertexID < 12) {
         farbe  = vec3(0.0, 1.0, 0.0);
@@ -60,6 +61,11 @@ void main() {
         farbe  = vec3(1.0, 0.0, 1.0);
     } else {
         farbe  = vec3(0.0, 1.0, 1.0);
-    }
-    gl_Position = matrix* vec4(vertex,1.0);
+    }*/
+    mat4 temp = transpose(inverse(matrix));
+    normalenAdjusted = normalize(mat3(temp)*normalen);
+    pixelCoordimRaum = vec3(matrix*vec4(vertex,1.0));
+    //normalenAdjusted = normalize(mat3(matrix)*normalen);
+    gl_Position = projectionMatrix*matrix* vec4(vertex,1.0);
+
 }

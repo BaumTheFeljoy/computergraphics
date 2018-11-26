@@ -7,7 +7,7 @@ import lenz.opengl.ShaderProgram;
 
 public class Aufgabe3undFolgende extends AbstractOpenGLBase {
 	int rotCounter;
-	float[] dreiecksKoordinaten = new float[]{0.7f,0.9f,0,-0.6f,0.6f,0,-0.4f,-0.8f,0,};
+	//float[] dreiecksKoordinaten = new float[]{0.7f,0.9f,0,-0.6f,0.6f,0,-0.4f,-0.8f,0,};
 	float[] wuerfel = new float[]{
 			//vorne
 			-0.5F, -0.5F, 0.5F,
@@ -63,14 +63,22 @@ public class Aufgabe3undFolgende extends AbstractOpenGLBase {
 			0.5F, -0.5F, -0.5F,
 			0.5F, 0.5F, -0.5F
 	};
+	float[] normalen = {
+			0,0,1,0,0,1,0,0,1,0,0,1,0,0,1,0,0,1,//vorne
+			0,0,-1,0,0,-1,0,0,-1,0,0,-1,0,0,-1,0,0,-1,//hinten
+			0,-1,0,0,-1,0,0,-1,0,0,-1,0,0,-1,0,0,-1,0,//unten
+			0,1,0,0,1,0,0,1,0,0,1,0,0,1,0,0,1,0,//oben
+			-1,0,0,-1,0,0,-1,0,0,-1,0,0,-1,0,0,-1,0,0,//links
+			1,0,0,1,0,0,1,0,0,1,0,0,1,0,0,1,0,0 //rechts
+	};
 	float[] farben = new float[]{1,0,0,0.9f,0,0.9f,1,0.5f,0};
-	Mat4 matrix = new Mat4();
+	Mat4 matrix = new Mat4().translate(0,0,-2);
 	int loc = 0;
 
 	private ShaderProgram shaderProgram;
 
 	public static void main(String[] args) {
-		new Aufgabe3undFolgende().start("CG Aufgabe 3", 700, 700);
+		new Aufgabe3undFolgende().start("CG Aufgabe 3", 1300, 1300);
 	}
 
 	@Override
@@ -84,9 +92,10 @@ public class Aufgabe3undFolgende extends AbstractOpenGLBase {
 		/*createVBO(dreiecksKoordinaten,3,0);*/
 		createVBO(wuerfel,3,0);
 		//createVBO(farben,3,1);
+		createVBO(normalen,3,1);
 
 		glEnable(GL_DEPTH_TEST); // z-Buffer aktivieren
-		//glEnable(GL_CULL_FACE); // backface culling aktivieren
+		glEnable(GL_CULL_FACE); // backface culling aktivieren
 
 		int uniformProjectionMatrixID = glGetUniformLocation(shaderProgram.getId(), "projectionMatrix");
 		glUniformMatrix4fv(uniformProjectionMatrixID, false, new Mat4(0.5F, 100F).getValuesAsArray());
@@ -103,12 +112,10 @@ public class Aufgabe3undFolgende extends AbstractOpenGLBase {
 	@Override
 	public void update() {
 		// Transformation durchführen (Matrix anpassen)
-
-		if(rotCounter<90){ matrix.rotateX(0.005f);}
-		else{ matrix.rotateY(0.005f);}
+		if(rotCounter<90){ matrix.translate(0,0,2).rotateX(0.01f).translate(0,0,-2);}
+		else{ matrix.translate(0,0,2).rotateY(0.01f).translate(0,0,-2);}
 		rotCounter = (rotCounter+1)%180;
-
-
+		/*matrix.translate(0,0,2).rotateY(0.006f).translate(0,0,-2);*/
 	}
 
 	@Override
