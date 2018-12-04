@@ -62,10 +62,10 @@ void main() {
     } else {
         farbe  = vec3(0.0, 1.0, 1.0);
     }*/
-    mat4 temp = transpose(inverse(matrix));
-    normalenAdjusted = normalize(mat3(temp)*normalen);
+    //mat4 temp = transpose(inverse(matrix));
+    //normalenAdjusted = normalize(mat3(temp)*normalen);
     pixelCoordimRaum = vec3(matrix*vec4(vertex,1.0));
-    //normalenAdjusted = normalize(mat3(matrix)*normalen);
+    normalenAdjusted = normalize(mat3(matrix)*normalen);
     gl_Position = projectionMatrix*matrix* vec4(vertex,1.0);
 
 }

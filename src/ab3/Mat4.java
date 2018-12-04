@@ -25,7 +25,6 @@ public class Mat4 {
     }
 
     public Mat4(float near, float far) {
-        // TODO erzeugt Projektionsmatrix mit Abstand zur nahen Ebene "near" und Abstand zur fernen Ebene "far", ggf. weitere Parameter hinzufügen
         m = new float[] {
                 near, 0, 0, 0,
                 0, near, 0, 0,

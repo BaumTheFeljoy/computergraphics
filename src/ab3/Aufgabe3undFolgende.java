@@ -112,9 +112,9 @@ public class Aufgabe3undFolgende extends AbstractOpenGLBase {
 	@Override
 	public void update() {
 		// Transformation durchführen (Matrix anpassen)
-		if(rotCounter<90){ matrix.translate(0,0,2).rotateX(0.01f).translate(0,0,-2);}
+		if(rotCounter<45){ matrix.translate(0,0,2).rotateX(0.01f).translate(0,0,-2);}
 		else{ matrix.translate(0,0,2).rotateY(0.01f).translate(0,0,-2);}
-		rotCounter = (rotCounter+1)%180;
+		rotCounter = (rotCounter+1)%90;
 		/*matrix.translate(0,0,2).rotateY(0.006f).translate(0,0,-2);*/
 	}
 
