@@ -2,6 +2,7 @@
 #define M_PI 3.1415926535897932384626433832795
 layout(location=0) in vec3 vertex;
 layout(location=1) in vec3 normalen;
+layout(location=2) in vec2 uvKoord;
 /*
 layout(location=1) in vec3 farbenAusJava;
 */
@@ -10,6 +11,7 @@ layout(location=1) in vec3 farbenAusJava;
 out vec3 farbe;
 out vec3 pixelCoordimRaum;
 out vec3 normalenAdjusted;
+out vec2 uv;
 
 uniform mat4 matrix;
 uniform mat4 projectionMatrix;
@@ -49,7 +51,8 @@ void main() {
     } else {
         farbe = vec3(0.5, 0.5, 0.5);
     }
-/* if (gl_VertexID < 6) {
+    /*
+if (gl_VertexID < 6) {
         farbe = vec3(1.0, 0.0, 0.0);
     } else if (gl_VertexID < 12) {
         farbe  = vec3(0.0, 1.0, 0.0);
@@ -61,11 +64,12 @@ void main() {
         farbe  = vec3(1.0, 0.0, 1.0);
     } else {
         farbe  = vec3(0.0, 1.0, 1.0);
-    }*/
+    }
+    */
     //mat4 temp = transpose(inverse(matrix));
     //normalenAdjusted = normalize(mat3(temp)*normalen);
+    uv=uvKoord;
     pixelCoordimRaum = vec3(matrix*vec4(vertex,1.0));
     normalenAdjusted = normalize(mat3(matrix)*normalen);
     gl_Position = projectionMatrix*matrix* vec4(vertex,1.0);
-
 }

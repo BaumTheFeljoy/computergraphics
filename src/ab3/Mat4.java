@@ -127,4 +127,12 @@ public class Mat4 {
         //hier Werte in einem Float-Array mit 16 Elementen (spaltenweise gefällt) herausgeben
         return m;
     }
+
+    /**
+     * @return the three location values of the matrix. used to keep rotating cube in its place
+     */
+    public float[] getMatLoc(){
+        float[] matLoc = new float[]{m[12],m[13],m[14]};
+        return matLoc;
+    }
 }

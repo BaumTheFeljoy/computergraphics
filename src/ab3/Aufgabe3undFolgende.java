@@ -1,12 +1,20 @@
 package ab3;
 
+import static org.lwjgl.glfw.GLFW.GLFW_KEY_SPACE;
+import static org.lwjgl.glfw.GLFW.glfwSetKeyCallback;
 import static org.lwjgl.opengl.GL30.*;
 
+import Input.KeyboardHandler;
 import lenz.opengl.AbstractOpenGLBase;
 import lenz.opengl.ShaderProgram;
+import lenz.opengl.Texture;
+import org.lwjgl.glfw.GLFWKeyCallback;
 
 public class Aufgabe3undFolgende extends AbstractOpenGLBase {
 	int rotCounter;
+	private GLFWKeyCallback keyCallback;
+	
+
 	//float[] dreiecksKoordinaten = new float[]{0.7f,0.9f,0,-0.6f,0.6f,0,-0.4f,-0.8f,0,};
 	float[] wuerfel = new float[]{
 			//vorne
@@ -63,6 +71,16 @@ public class Aufgabe3undFolgende extends AbstractOpenGLBase {
 			0.5F, -0.5F, -0.5F,
 			0.5F, 0.5F, -0.5F
 	};
+
+	float[] uvKoord = {
+			0,0,0,0.5f,0.5f,0, 0.5f,0,0,0.5f,0.5f,0.5f, //gut 1.
+			0,0,0,0.25f,0.25f,0, 0,0.25f,0.25f,0.25f,0.25f,0, //gut 2.
+			0,0.75f,0.75f,0,0,0, 0,0.75f,0.75f,0.75f,0.75f,0,//gut 3.
+			0.25f,0.25f,0.5f,0.25f,0.5f,0.5f, 0.25f,0.25f,0.5f,0.5f,0.25f,0.5f,// gut 4.
+			0.75f,0.75f,0.75f,1,1,0.75f, 1,0.75f,0.75f,1,1,1, //gut 5.
+			0,0,0,1,1,0, 0,1,1,1,1,0, //gut 6.
+	};
+
 	float[] normalen = {
 			0,0,1,0,0,1,0,0,1,0,0,1,0,0,1,0,0,1,//vorne
 			0,0,-1,0,0,-1,0,0,-1,0,0,-1,0,0,-1,0,0,-1,//hinten
@@ -83,23 +101,32 @@ public class Aufgabe3undFolgende extends AbstractOpenGLBase {
 
 	@Override
 	protected void init() {
+		glfwSetKeyCallback(super.getWindow(), keyCallback = new KeyboardHandler());
+
 		shaderProgram = new ShaderProgram("aufgabe3");
 		glUseProgram(shaderProgram.getId());
 		loc = glGetUniformLocation(shaderProgram.getId(),"matrix");
+
 		// Koordinaten, VAO, VBO, ... hier anlegen und im Grafikspeicher ablegen
 		int vaoId = glGenVertexArrays();
 		glBindVertexArray(vaoId);
 		/*createVBO(dreiecksKoordinaten,3,0);*/
-		createVBO(wuerfel,3,0);
 		//createVBO(farben,3,1);
+		createVBO(wuerfel,3,0);
 		createVBO(normalen,3,1);
+		createVBO(uvKoord,2,2);
+
 
 		glEnable(GL_DEPTH_TEST); // z-Buffer aktivieren
 		glEnable(GL_CULL_FACE); // backface culling aktivieren
 
 		int uniformProjectionMatrixID = glGetUniformLocation(shaderProgram.getId(), "projectionMatrix");
 		glUniformMatrix4fv(uniformProjectionMatrixID, false, new Mat4(0.5F, 100F).getValuesAsArray());
+
+		Texture texture = new Texture("tex.jpg",8);
+		glBindTexture(GL_TEXTURE_2D, texture.getId());
 	}
+
 
 	private void createVBO(float[] werte, int size, int id) {
 		int vboId = glGenBuffers();
@@ -110,12 +137,39 @@ public class Aufgabe3undFolgende extends AbstractOpenGLBase {
 	}
 
 	@Override
+	/**
+	 * Moves the cube with awsd, Rotate the cube with the arrow keys
+	 */
 	public void update() {
-		// Transformation durchführen (Matrix anpassen)
-		if(rotCounter<45){ matrix.translate(0,0,2).rotateX(0.01f).translate(0,0,-2);}
-		else{ matrix.translate(0,0,2).rotateY(0.01f).translate(0,0,-2);}
-		rotCounter = (rotCounter+1)%90;
-		/*matrix.translate(0,0,2).rotateY(0.006f).translate(0,0,-2);*/
+		if(KeyboardHandler.isKeyDown(65)) { //A
+			matrix.translate(-0.01f, 0, 0);
+		}
+		if(KeyboardHandler.isKeyDown(68)) { //D
+			matrix.translate(0.01f, 0, 0);
+		}
+		if(KeyboardHandler.isKeyDown(87)) { //W
+			matrix.translate(0, 0.01f,0);
+		}
+		if(KeyboardHandler.isKeyDown(83)) { //S
+			matrix.translate(0, -0.01f, 0);
+		}
+		if(KeyboardHandler.isKeyDown(263)) {//Left Arrow Key
+			float[] loc = matrix.getMatLoc();
+			matrix.translate(-loc[0], -loc[1], -loc[2]).rotateY(0.01f).translate(loc[0], loc[1], loc[2]);
+		}
+		if(KeyboardHandler.isKeyDown(262)) { //Right Arrow Key
+			float[] loc = matrix.getMatLoc();
+			matrix.translate(-loc[0], -loc[1], -loc[2]).rotateY(-0.01f).translate(loc[0], loc[1], loc[2]);
+		}
+		if(KeyboardHandler.isKeyDown(265)) {//Up Arrow Key
+			float[] loc = matrix.getMatLoc();
+			matrix.translate(-loc[0], -loc[1], -loc[2]).rotateX(-0.01f).translate(loc[0], loc[1], loc[2]);
+		}
+		if(KeyboardHandler.isKeyDown(264)) {//Down Arrow Key
+			float[] loc = matrix.getMatLoc();
+			matrix.translate(-loc[0], -loc[1], -loc[2]).rotateX(0.01f).translate(loc[0], loc[1], loc[2]);
+		}
+
 	}
 
 	@Override
