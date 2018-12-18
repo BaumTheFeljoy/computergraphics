@@ -24,7 +24,7 @@ gl_Position = eckenRotiert;
 //warum nicht als out wie im F.Shader?!
 }*/
 void main() {
-    //black
+/*    //black
     if (vertex.x == -0.5 && vertex.y == -0.5 && vertex.z == -0.5) {
         farbe = vec3(0.0, 0.0, 0.0);
     //red
@@ -50,8 +50,8 @@ void main() {
         farbe = vec3(1.0, 1.0, 1.0);
     } else {
         farbe = vec3(0.5, 0.5, 0.5);
-    }
-    /*
+    }*/
+
 if (gl_VertexID < 6) {
         farbe = vec3(1.0, 0.0, 0.0);
     } else if (gl_VertexID < 12) {
@@ -65,11 +65,13 @@ if (gl_VertexID < 6) {
     } else {
         farbe  = vec3(0.0, 1.0, 1.0);
     }
-    */
-    //mat4 temp = transpose(inverse(matrix));
-    //normalenAdjusted = normalize(mat3(temp)*normalen);
+
     uv=uvKoord;
+
+    mat4 temp = transpose(inverse(matrix));
+    normalenAdjusted = normalize(mat3(temp)*normalen);
+    //normalenAdjusted = normalize(mat3(matrix)*normalen);
     pixelCoordimRaum = vec3(matrix*vec4(vertex,1.0));
-    normalenAdjusted = normalize(mat3(matrix)*normalen);
+
     gl_Position = projectionMatrix*matrix* vec4(vertex,1.0);
 }

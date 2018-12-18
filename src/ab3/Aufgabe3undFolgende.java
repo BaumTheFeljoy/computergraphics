@@ -1,6 +1,5 @@
 package ab3;
 
-import static org.lwjgl.glfw.GLFW.GLFW_KEY_SPACE;
 import static org.lwjgl.glfw.GLFW.glfwSetKeyCallback;
 import static org.lwjgl.opengl.GL30.*;
 
@@ -11,7 +10,6 @@ import lenz.opengl.Texture;
 import org.lwjgl.glfw.GLFWKeyCallback;
 
 public class Aufgabe3undFolgende extends AbstractOpenGLBase {
-	int rotCounter;
 	private GLFWKeyCallback keyCallback;
 	
 
@@ -81,15 +79,16 @@ public class Aufgabe3undFolgende extends AbstractOpenGLBase {
 			0,0,0,1,1,0, 0,1,1,1,1,0, //gut 6.
 	};
 
-	float[] normalen = {
+	/*float[] normalen = {
 			0,0,1,0,0,1,0,0,1,0,0,1,0,0,1,0,0,1,//vorne
 			0,0,-1,0,0,-1,0,0,-1,0,0,-1,0,0,-1,0,0,-1,//hinten
 			0,-1,0,0,-1,0,0,-1,0,0,-1,0,0,-1,0,0,-1,0,//unten
 			0,1,0,0,1,0,0,1,0,0,1,0,0,1,0,0,1,0,//oben
 			-1,0,0,-1,0,0,-1,0,0,-1,0,0,-1,0,0,-1,0,0,//links
 			1,0,0,1,0,0,1,0,0,1,0,0,1,0,0,1,0,0 //rechts
-	};
-	float[] farben = new float[]{1,0,0,0.9f,0,0.9f,1,0.5f,0};
+	};*/
+	float[] normalen = generateNorms(wuerfel,36);
+	//float[] farben = new float[]{1,0,0,0.9f,0,0.9f,1,0.5f,0};
 	Mat4 matrix = new Mat4().translate(0,0,-2);
 	int loc = 0;
 
@@ -169,7 +168,6 @@ public class Aufgabe3undFolgende extends AbstractOpenGLBase {
 			float[] loc = matrix.getMatLoc();
 			matrix.translate(-loc[0], -loc[1], -loc[2]).rotateX(0.01f).translate(loc[0], loc[1], loc[2]);
 		}
-
 	}
 
 	@Override
@@ -184,4 +182,32 @@ public class Aufgabe3undFolgende extends AbstractOpenGLBase {
 	@Override
 	public void destroy() {
 	}
+
+	private float[] generateNorms(float[] objectKoords, int amountPoints){
+		Vector[] vectors = new Vector[amountPoints];
+		int counter = 0;
+		for (int i = 0; i < objectKoords.length; i+=3) {
+			Vector p = new Vector(objectKoords[i],objectKoords[i+1],objectKoords[i+2]);
+			vectors[counter] = p;
+			counter++;
+		}
+
+		float[] norms = new float[36*3];
+		int normscounter = -1;
+		for (int i = 0; i < vectors.length; i+=3) {
+			Vector a = vectors[i];
+			Vector b = vectors[i+1];
+			Vector c = vectors[i+2];
+
+			Vector normA = a.getVectorTo(b).crossWith(a.getVectorTo(c));
+			for (int j = 0; j < 3; j++) {
+				norms[++normscounter]=normA.x;
+				norms[++normscounter]=normA.y;
+				norms[++normscounter]=normA.z;
+			}
+		}
+		return norms;
+	}
+
+
 }
