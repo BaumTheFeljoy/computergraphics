@@ -11,9 +11,30 @@ import org.lwjgl.glfw.GLFWKeyCallback;
 
 public class Aufgabe3undFolgende extends AbstractOpenGLBase {
 	private GLFWKeyCallback keyCallback;
-	
 
-	//float[] dreiecksKoordinaten = new float[]{0.7f,0.9f,0,-0.6f,0.6f,0,-0.4f,-0.8f,0,};
+	float val = (float) (Math.sqrt(3) / 4);
+	float[] tetraeder = new float[] {
+				//front
+				0.5f, val, 0,
+				-0.5f, val, 0,
+				0, -val, 0.5f,
+
+				//left
+				-0.5f, val, 0,
+				0, -val, -0.5f,
+				0, -val, 0.5f,
+
+				//right
+				0.5f, val, 0,
+				0, -val, 0.5f,
+				0, -val, -0.5f,
+
+				//back
+				-0.5f, val, 0,
+				0.5f, val, 0,
+				0, -val, -0.5f
+	};
+	
 	float[] wuerfel = new float[]{
 			//vorne
 			-0.5F, -0.5F, 0.5F,
@@ -79,23 +100,18 @@ public class Aufgabe3undFolgende extends AbstractOpenGLBase {
 			0,0,0,1,1,0, 0,1,1,1,1,0, //gut 6.
 	};
 
-	/*float[] normalen = {
-			0,0,1,0,0,1,0,0,1,0,0,1,0,0,1,0,0,1,//vorne
-			0,0,-1,0,0,-1,0,0,-1,0,0,-1,0,0,-1,0,0,-1,//hinten
-			0,-1,0,0,-1,0,0,-1,0,0,-1,0,0,-1,0,0,-1,0,//unten
-			0,1,0,0,1,0,0,1,0,0,1,0,0,1,0,0,1,0,//oben
-			-1,0,0,-1,0,0,-1,0,0,-1,0,0,-1,0,0,-1,0,0,//links
-			1,0,0,1,0,0,1,0,0,1,0,0,1,0,0,1,0,0 //rechts
-	};*/
-	float[] normalen = generateNorms(wuerfel,36);
+	float[] normalen = generateNormals(tetraeder,12);
 	//float[] farben = new float[]{1,0,0,0.9f,0,0.9f,1,0.5f,0};
-	Mat4 matrix = new Mat4().translate(0,0,-2);
+	Mat4 matrix = new Mat4().translate(0,0,-4);
+
+	Mat4 matrix2 = new Mat4().translate(1,1,-4);
+
 	int loc = 0;
 
 	private ShaderProgram shaderProgram;
 
 	public static void main(String[] args) {
-		new Aufgabe3undFolgende().start("CG Aufgabe 3", 1300, 1300);
+		new Aufgabe3undFolgende().start("WASD = move; QE = zoom; Arrow Keys = rotate", 900, 900);
 	}
 
 	@Override
@@ -104,14 +120,12 @@ public class Aufgabe3undFolgende extends AbstractOpenGLBase {
 
 		shaderProgram = new ShaderProgram("aufgabe3");
 		glUseProgram(shaderProgram.getId());
-		loc = glGetUniformLocation(shaderProgram.getId(),"matrix");
+		loc = glGetUniformLocation(shaderProgram.getId(),"matrix"); //Warum steht das hier?
 
 		// Koordinaten, VAO, VBO, ... hier anlegen und im Grafikspeicher ablegen
 		int vaoId = glGenVertexArrays();
 		glBindVertexArray(vaoId);
-		/*createVBO(dreiecksKoordinaten,3,0);*/
-		//createVBO(farben,3,1);
-		createVBO(wuerfel,3,0);
+		createVBO(tetraeder,3,0);
 		createVBO(normalen,3,1);
 		createVBO(uvKoord,2,2);
 
@@ -120,10 +134,13 @@ public class Aufgabe3undFolgende extends AbstractOpenGLBase {
 		glEnable(GL_CULL_FACE); // backface culling aktivieren
 
 		int uniformProjectionMatrixID = glGetUniformLocation(shaderProgram.getId(), "projectionMatrix");
-		glUniformMatrix4fv(uniformProjectionMatrixID, false, new Mat4(0.5F, 100F).getValuesAsArray());
+		glUniformMatrix4fv(uniformProjectionMatrixID, false, new Mat4(2f, 100F).getValuesAsArray());
 
-		Texture texture = new Texture("tex.jpg",8);
+		Texture texture = new Texture("tex.jpg",8,true);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST_MIPMAP_NEAREST);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST_MIPMAP_NEAREST);
 		glBindTexture(GL_TEXTURE_2D, texture.getId());
+
 	}
 
 
@@ -137,7 +154,7 @@ public class Aufgabe3undFolgende extends AbstractOpenGLBase {
 
 	@Override
 	/**
-	 * Moves the cube with awsd, Rotate the cube with the arrow keys
+	 * Move the cube with awsd, Rotate the cube with arrow keys
 	 */
 	public void update() {
 		if(KeyboardHandler.isKeyDown(65)) { //A
@@ -168,6 +185,12 @@ public class Aufgabe3undFolgende extends AbstractOpenGLBase {
 			float[] loc = matrix.getMatLoc();
 			matrix.translate(-loc[0], -loc[1], -loc[2]).rotateX(0.01f).translate(loc[0], loc[1], loc[2]);
 		}
+		if (KeyboardHandler.isKeyDown(81)) { //Q
+			matrix.translate(0, 0, 0.01f);
+		}
+		if (KeyboardHandler.isKeyDown(69)) { //E
+			matrix.translate(0, 0, -0.01f);
+		}
 	}
 
 	@Override
@@ -176,14 +199,15 @@ public class Aufgabe3undFolgende extends AbstractOpenGLBase {
 		// Matrix an Shader übertragen
 		glUniformMatrix4fv(loc,false,matrix.getValuesAsArray());
 		// VAOs zeichnen
-		glDrawArrays(GL_TRIANGLES, 0, 36);
+		glDrawArrays(GL_TRIANGLES, 0, 12);
 	}
 
 	@Override
 	public void destroy() {
 	}
 
-	private float[] generateNorms(float[] objectKoords, int amountPoints){
+
+	private float[] generateNormals(float[] objectKoords, int amountPoints){
 		Vector[] vectors = new Vector[amountPoints];
 		int counter = 0;
 		for (int i = 0; i < objectKoords.length; i+=3) {
@@ -192,7 +216,7 @@ public class Aufgabe3undFolgende extends AbstractOpenGLBase {
 			counter++;
 		}
 
-		float[] norms = new float[36*3];
+		float[] norms = new float[amountPoints*3];
 		int normscounter = -1;
 		for (int i = 0; i < vectors.length; i+=3) {
 			Vector a = vectors[i];

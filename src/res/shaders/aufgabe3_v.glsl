@@ -16,15 +16,8 @@ out vec2 uv;
 uniform mat4 matrix;
 uniform mat4 projectionMatrix;
 
-/*void main() {
-//hier kann Transformation erfolgen
-vec4 eckenRotiert = matrix*eckenAusJava;
-farbe = farbenAusJava;
-gl_Position = eckenRotiert;
-//warum nicht als out wie im F.Shader?!
-}*/
 void main() {
-/*    //black
+  //black
     if (vertex.x == -0.5 && vertex.y == -0.5 && vertex.z == -0.5) {
         farbe = vec3(0.0, 0.0, 0.0);
     //red
@@ -50,9 +43,9 @@ void main() {
         farbe = vec3(1.0, 1.0, 1.0);
     } else {
         farbe = vec3(0.5, 0.5, 0.5);
-    }*/
+    }
 
-if (gl_VertexID < 6) {
+/*if (gl_VertexID < 6) {
         farbe = vec3(1.0, 0.0, 0.0);
     } else if (gl_VertexID < 12) {
         farbe  = vec3(0.0, 1.0, 0.0);
@@ -64,7 +57,7 @@ if (gl_VertexID < 6) {
         farbe  = vec3(1.0, 0.0, 1.0);
     } else {
         farbe  = vec3(0.0, 1.0, 1.0);
-    }
+    }*/
 
     uv=uvKoord;
 
