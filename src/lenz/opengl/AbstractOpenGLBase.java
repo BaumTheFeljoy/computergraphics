@@ -72,7 +72,7 @@ public abstract class AbstractOpenGLBase {
 
 		glfwMakeContextCurrent(window);
 
-		glfwSwapInterval(1); // v-sync
+		glfwSwapInterval(0); // v-sync
 
 		glfwShowWindow(window);
 		return window;

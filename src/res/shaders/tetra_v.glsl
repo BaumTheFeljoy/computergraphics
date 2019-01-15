@@ -14,18 +14,19 @@ out vec3 pixelCoordimRaum;
 out vec3 normalenAdjusted;
 out vec2 uv;
 
-uniform mat4 matrix;
+uniform mat4 matrix2;
 uniform mat4 projectionMatrix;
 
 void main() {
+
     farbe = vec3(vertex.x,vertex.y,vertex.z);
 
     uv=uvKoord;
 
-    mat4 temp = transpose(inverse(matrix));
+    mat4 temp = transpose(inverse(matrix2));
     normalenAdjusted = normalize(mat3(temp)*normalen);
     //normalenAdjusted = normalize(mat3(matrix)*normalen);
-    pixelCoordimRaum = vec3(matrix*vec4(vertex,1.0));
+    pixelCoordimRaum = vec3(matrix2*vec4(vertex,1.0));
 
-    gl_Position = projectionMatrix*matrix* vec4(vertex,1.0);
+    gl_Position = projectionMatrix*matrix2* vec4(vertex,1.0);
 }

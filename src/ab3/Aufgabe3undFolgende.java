@@ -10,10 +10,119 @@ import lenz.opengl.Texture;
 import org.lwjgl.glfw.GLFWKeyCallback;
 
 public class Aufgabe3undFolgende extends AbstractOpenGLBase {
+	private ShaderProgram shaderProgram;
+	private ShaderProgram shaderProgram2;
 	private GLFWKeyCallback keyCallback;
+	private int vaoIdCube;
+	private int vaoIdTetr;
+	private int texIdCube;
+	private int texIdTetr;
 
-	float val = (float) (Math.sqrt(3) / 4);
-	float[] tetraeder = new float[] {
+    /*float[] colors = generateTex(uvKoord);*/
+
+
+	//float[] farben = new float[]{1,0,0,0.9f,0,0.9f,1,0.5f,0};
+
+	Mat4 matrix = new Mat4().translate(-1,-1,-4);
+
+	Mat4 matrix2 = new Mat4().translate(1,1,-4);
+
+	public static void main(String[] args) {
+		new Aufgabe3undFolgende().start("WASD = move; QE = zoom; Arrow Keys = rotate", 900, 900);
+	}
+
+	private void generateCube(){
+		int amountPoints = 36;
+
+		float[] wuerfel = new float[]{
+				//vorne
+				-0.5F, -0.5F, 0.5F,
+				0.5F, -0.5F, 0.5F,
+				-0.5F, 0.5F, 0.5F,
+
+				-0.5F, 0.5F, 0.5F,
+				0.5F, -0.5F, 0.5F,
+				0.5F, 0.5F, 0.5F,
+
+				//hinten
+				-0.5F, -0.5F, -0.5F,
+				-0.5F, 0.5F, -0.5F,
+				0.5F, -0.5F, -0.5F,
+
+				-0.5F, 0.5F, -0.5F,
+				0.5F, 0.5F, -0.5F,
+				0.5F, -0.5F, -0.5F,
+
+				//unten
+				-0.5F, -0.5F, 0.5F,
+				0.5F, -0.5F, -0.5F,
+				0.5F, -0.5F, 0.5F,
+
+				-0.5F, -0.5F, 0.5F,
+				-0.5F, -0.5F, -0.5F,
+				0.5F, -0.5F, -0.5F,
+
+				//oben
+				-0.5F, 0.5F, 0.5F,
+				0.5F, 0.5F, 0.5F,
+				0.5F, 0.5F, -0.5F,
+
+				-0.5F, 0.5F, 0.5F,
+				0.5F, 0.5F, -0.5F,
+				-0.5F, 0.5F, -0.5F,
+
+				//links
+				-0.5F, 0.5F, 0.5F,
+				-0.5F, 0.5F, -0.5F,
+				-0.5F, -0.5F, 0.5F,
+
+				-0.5F, -0.5F, 0.5F,
+				-0.5F, 0.5F, -0.5F,
+				-0.5F, -0.5F, -0.5F,
+
+				//rechts
+				0.5F, 0.5F, 0.5F,
+				0.5F, -0.5F, 0.5F,
+				0.5F, 0.5F, -0.5F,
+
+				0.5F, -0.5F, 0.5F,
+				0.5F, -0.5F, -0.5F,
+				0.5F, 0.5F, -0.5F
+		};
+
+		float[] uvKoord = {
+				0,0,0,0.5f,0.5f,0, 0.5f,0,0,0.5f,0.5f,0.5f, //gut 1.
+				0,0,0,0.25f,0.25f,0, 0,0.25f,0.25f,0.25f,0.25f,0, //gut 2.
+				0,0.75f,0.75f,0,0,0, 0,0.75f,0.75f,0.75f,0.75f,0,//gut 3.
+				0.25f,0.25f,0.5f,0.25f,0.5f,0.5f, 0.25f,0.25f,0.5f,0.5f,0.25f,0.5f,// gut 4.
+				0.75f,0.75f,0.75f,1,1,0.75f, 1,0.75f,0.75f,1,1,1, //gut 5.
+				0,0,0,1,1,0, 0,1,1,1,1,0, //gut 6.
+		};
+
+		float[] normalen = generateNormals(wuerfel,amountPoints);
+
+		glUseProgram(shaderProgram.getId());
+
+		// Koordinaten, VAO, VBO, ... hier anlegen und im Grafikspeicher ablegen
+		vaoIdCube = glGenVertexArrays();
+		glBindVertexArray(vaoIdCube);
+		createVBO(wuerfel,3,0);
+		createVBO(normalen,3,1);
+		createVBO(uvKoord,2,2);
+		//createVBO(colors,1,3);
+
+		Texture texture = new Texture("tex.jpg",8,true);
+		texIdCube = texture.getId();
+
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST_MIPMAP_NEAREST);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST_MIPMAP_NEAREST);
+		glBindTexture(GL_TEXTURE_2D, texIdCube);
+	}
+
+	private void generateTetraeder(){
+		int amountPoints = 12;
+		float val = (float) (Math.sqrt(3) / 4);
+		float[] tetraeder = new float[] {
 				//front
 				0.5f, val, 0,
 				-0.5f, val, 0,
@@ -33,114 +142,50 @@ public class Aufgabe3undFolgende extends AbstractOpenGLBase {
 				-0.5f, val, 0,
 				0.5f, val, 0,
 				0, -val, -0.5f
-	};
-	
-	float[] wuerfel = new float[]{
-			//vorne
-			-0.5F, -0.5F, 0.5F,
-			0.5F, -0.5F, 0.5F,
-			-0.5F, 0.5F, 0.5F,
+		};
 
-			-0.5F, 0.5F, 0.5F,
-			0.5F, -0.5F, 0.5F,
-			0.5F, 0.5F, 0.5F,
+		float[] uvKoord2 = {
+				0,0,0,1,1,0, 1,0,0,1,1,1, //gut 1. Zeile
+				0,0,0,1,1,0, 0,1,1,1,1,0, //gut 2. Zeile
+				0,1,1,0,0,0, 0,1,1,1,1,0, //gut 3. Zeile
+				0,0,1,0,1,1, 0,0,1,1,0,1,// gut 4. Zeile
+				0,0,0,1,1,0, 1,0,0,1,1,1, //gut 5. Zeile
+				0,0,0,1,1,0, 0,1,1,1,1,0, //gut 6. Zeile
+		};
 
-			//hinten
-			-0.5F, -0.5F, -0.5F,
-			-0.5F, 0.5F, -0.5F,
-			0.5F, -0.5F, -0.5F,
+		float[] normalen = generateNormals(tetraeder,amountPoints);
 
-			-0.5F, 0.5F, -0.5F,
-			0.5F, 0.5F, -0.5F,
-			0.5F, -0.5F, -0.5F,
+		glUseProgram(shaderProgram2.getId());
 
-			//unten
-			-0.5F, -0.5F, 0.5F,
-			0.5F, -0.5F, -0.5F,
-			0.5F, -0.5F, 0.5F,
+		vaoIdTetr = glGenVertexArrays();
+		glBindVertexArray(vaoIdTetr);
 
-			-0.5F, -0.5F, 0.5F,
-			-0.5F, -0.5F, -0.5F,
-			0.5F, -0.5F, -0.5F,
+		createVBO(tetraeder,3,0);
+		createVBO(normalen,3,1);
+		createVBO(tetraeder,2,2);
 
-			//oben
-			-0.5F, 0.5F, 0.5F,
-			0.5F, 0.5F, 0.5F,
-			0.5F, 0.5F, -0.5F,
+		Texture texture = new Texture("flag16.jpg",8,true);
+		texIdTetr = texture.getId();
 
-			-0.5F, 0.5F, 0.5F,
-			0.5F, 0.5F, -0.5F,
-			-0.5F, 0.5F, -0.5F,
-
-			//links
-			-0.5F, 0.5F, 0.5F,
-			-0.5F, 0.5F, -0.5F,
-			-0.5F, -0.5F, 0.5F,
-
-			-0.5F, -0.5F, 0.5F,
-			-0.5F, 0.5F, -0.5F,
-			-0.5F, -0.5F, -0.5F,
-
-			//rechts
-			0.5F, 0.5F, 0.5F,
-			0.5F, -0.5F, 0.5F,
-			0.5F, 0.5F, -0.5F,
-
-			0.5F, -0.5F, 0.5F,
-			0.5F, -0.5F, -0.5F,
-			0.5F, 0.5F, -0.5F
-	};
-
-	float[] uvKoord = {
-			0,0,0,0.5f,0.5f,0, 0.5f,0,0,0.5f,0.5f,0.5f, //gut 1.
-			0,0,0,0.25f,0.25f,0, 0,0.25f,0.25f,0.25f,0.25f,0, //gut 2.
-			0,0.75f,0.75f,0,0,0, 0,0.75f,0.75f,0.75f,0.75f,0,//gut 3.
-			0.25f,0.25f,0.5f,0.25f,0.5f,0.5f, 0.25f,0.25f,0.5f,0.5f,0.25f,0.5f,// gut 4.
-			0.75f,0.75f,0.75f,1,1,0.75f, 1,0.75f,0.75f,1,1,1, //gut 5.
-			0,0,0,1,1,0, 0,1,1,1,1,0, //gut 6.
-	};
-
-	float[] normalen = generateNormals(tetraeder,12);
-	//float[] farben = new float[]{1,0,0,0.9f,0,0.9f,1,0.5f,0};
-	Mat4 matrix = new Mat4().translate(0,0,-4);
-
-	Mat4 matrix2 = new Mat4().translate(1,1,-4);
-
-	int loc = 0;
-
-	private ShaderProgram shaderProgram;
-
-	public static void main(String[] args) {
-		new Aufgabe3undFolgende().start("WASD = move; QE = zoom; Arrow Keys = rotate", 900, 900);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST_MIPMAP_NEAREST);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST_MIPMAP_NEAREST);
+		glBindTexture(GL_TEXTURE_2D, texIdTetr);
 	}
 
 	@Override
 	protected void init() {
+		shaderProgram = new ShaderProgram("aufgabe3");
+		shaderProgram2 = new ShaderProgram("tetra");
 		glfwSetKeyCallback(super.getWindow(), keyCallback = new KeyboardHandler());
 
-		shaderProgram = new ShaderProgram("aufgabe3");
-		glUseProgram(shaderProgram.getId());
-		loc = glGetUniformLocation(shaderProgram.getId(),"matrix"); //Warum steht das hier?
-
-		// Koordinaten, VAO, VBO, ... hier anlegen und im Grafikspeicher ablegen
-		int vaoId = glGenVertexArrays();
-		glBindVertexArray(vaoId);
-		createVBO(tetraeder,3,0);
-		createVBO(normalen,3,1);
-		createVBO(uvKoord,2,2);
-
+		generateCube();
+		generateTetraeder();
 
 		glEnable(GL_DEPTH_TEST); // z-Buffer aktivieren
 		glEnable(GL_CULL_FACE); // backface culling aktivieren
 
 		int uniformProjectionMatrixID = glGetUniformLocation(shaderProgram.getId(), "projectionMatrix");
-		glUniformMatrix4fv(uniformProjectionMatrixID, false, new Mat4(2f, 100F).getValuesAsArray());
-
-		Texture texture = new Texture("tex.jpg",8,true);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST_MIPMAP_NEAREST);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST_MIPMAP_NEAREST);
-		glBindTexture(GL_TEXTURE_2D, texture.getId());
-
+		glUniformMatrix4fv(uniformProjectionMatrixID, false, new Mat4(2f, 10F).getValuesAsArray());
 	}
 
 
@@ -158,54 +203,67 @@ public class Aufgabe3undFolgende extends AbstractOpenGLBase {
 	 */
 	public void update() {
 		if(KeyboardHandler.isKeyDown(65)) { //A
-			matrix.translate(-0.01f, 0, 0);
+			matrix.translate(-0.001f, 0, 0);
 		}
 		if(KeyboardHandler.isKeyDown(68)) { //D
-			matrix.translate(0.01f, 0, 0);
+			matrix.translate(0.001f, 0, 0);
 		}
 		if(KeyboardHandler.isKeyDown(87)) { //W
-			matrix.translate(0, 0.01f,0);
+			matrix.translate(0, 0.001f,0);
 		}
 		if(KeyboardHandler.isKeyDown(83)) { //S
-			matrix.translate(0, -0.01f, 0);
+			matrix.translate(0, -0.001f, 0);
 		}
 		if(KeyboardHandler.isKeyDown(263)) {//Left Arrow Key
 			float[] loc = matrix.getMatLoc();
-			matrix.translate(-loc[0], -loc[1], -loc[2]).rotateY(0.01f).translate(loc[0], loc[1], loc[2]);
+			matrix.translate(-loc[0], -loc[1], -loc[2]).rotateY(0.001f).translate(loc[0], loc[1], loc[2]);
 		}
 		if(KeyboardHandler.isKeyDown(262)) { //Right Arrow Key
 			float[] loc = matrix.getMatLoc();
-			matrix.translate(-loc[0], -loc[1], -loc[2]).rotateY(-0.01f).translate(loc[0], loc[1], loc[2]);
+			matrix.translate(-loc[0], -loc[1], -loc[2]).rotateY(-0.001f).translate(loc[0], loc[1], loc[2]);
 		}
 		if(KeyboardHandler.isKeyDown(265)) {//Up Arrow Key
 			float[] loc = matrix.getMatLoc();
-			matrix.translate(-loc[0], -loc[1], -loc[2]).rotateX(-0.01f).translate(loc[0], loc[1], loc[2]);
+			matrix.translate(-loc[0], -loc[1], -loc[2]).rotateX(-0.001f).translate(loc[0], loc[1], loc[2]);
 		}
 		if(KeyboardHandler.isKeyDown(264)) {//Down Arrow Key
 			float[] loc = matrix.getMatLoc();
-			matrix.translate(-loc[0], -loc[1], -loc[2]).rotateX(0.01f).translate(loc[0], loc[1], loc[2]);
+			matrix.translate(-loc[0], -loc[1], -loc[2]).rotateX(0.001f).translate(loc[0], loc[1], loc[2]);
 		}
 		if (KeyboardHandler.isKeyDown(81)) { //Q
-			matrix.translate(0, 0, 0.01f);
+			matrix.translate(0, 0, 0.001f);
 		}
 		if (KeyboardHandler.isKeyDown(69)) { //E
-			matrix.translate(0, 0, -0.01f);
+			matrix.translate(0, 0, -0.001f);
 		}
+
+		float[] loc = matrix2.getMatLoc();
+		matrix2.translate(-loc[0], -loc[1], -loc[2]).rotateY(0.001f).translate(loc[0], loc[1], loc[2]);
 	}
 
 	@Override
 	protected void render() {
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		// Matrix an Shader übertragen
+		int loc = glGetUniformLocation(shaderProgram.getId(), "matrix");
 		glUniformMatrix4fv(loc,false,matrix.getValuesAsArray());
+		glBindVertexArray(vaoIdCube);
+		glBindTexture(GL_TEXTURE_2D, texIdCube);
 		// VAOs zeichnen
-		glDrawArrays(GL_TRIANGLES, 0, 12);
+		glDrawArrays(GL_TRIANGLES, 0, 36);
+
+		// Matrix an Shader übertragen
+		int loc2 = glGetUniformLocation(shaderProgram2.getId(), "matrix2");
+		glUniformMatrix4fv(loc2, false,matrix2.getValuesAsArray());
+		glBindVertexArray(vaoIdTetr);
+		glBindTexture(GL_TEXTURE_2D, texIdTetr);
+		// VAOs zeichnen
+		glDrawArrays(GL_TRIANGLES,0,12);
 	}
 
 	@Override
 	public void destroy() {
 	}
-
 
 	private float[] generateNormals(float[] objectKoords, int amountPoints){
 		Vector[] vectors = new Vector[amountPoints];
@@ -232,6 +290,4 @@ public class Aufgabe3undFolgende extends AbstractOpenGLBase {
 		}
 		return norms;
 	}
-
-
 }

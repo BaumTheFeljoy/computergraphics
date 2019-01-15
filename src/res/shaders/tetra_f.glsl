@@ -24,6 +24,6 @@ void main(){
     float specular = pow(max(0,intensity*dot(r,v)),100)*intensity;
     float lightResult = ambient + diffuse + specular;
     //objectFarbe = farbe*lightResult;
-    //objectFarbe = lightResult*texel.rgb;
-    objectFarbe = farbe;
+    objectFarbe = lightResult*texel.rgb;
+    //objectFarbe = farbe;
 }
